@@ -3,16 +3,37 @@ var router = express.Router();
 var mongojs = require('mongojs');
 var db = mongojs('mongodb://localhost:27017/fridment-new', ['milestones']);
 var datetime = require('node-datetime');
+// var jwt = require('express-jwt');
+// var jwks = require('jwks-rsa');
+
+// var jwtCheck = jwt({
+//     secret: jwks.expressJwtSecret({
+//         cache: true,
+//         rateLimit: true,
+//         jwksRequestsPerMinute: 5,
+//         jwksUri: "https://fridment.eu.auth0.com/.well-known/jwks.json"
+//     }),
+//     audience: 'http://fridment-react-exptess-fmi.com',
+//     issuer: "https://fridment.eu.auth0.com/",
+//     algorithms: ['RS256']
+// });
+// app.use(jwtCheck);
 
 /* GET users listing. */
 router.get('/', function(req, res, next) {
 
-  db.milestones.find(function(err, milestones){
+  db.milestones.aggregate([{$lookup: { from : "issues", localField: 'id', foreignField: 'milestone_id', as: 'issues'}},
+                           {$lookup: { from : "comments", localField: 'id', foreignField: 'milestone_id', as: 'comments'}},
+                           {$lookup: {from: 'issue_testers', localField: 'id', foreignField: 'milestone_id', as: 'testers'}},
+                           {$project: {"number_of_issues":{$size: '$issues'},
+                           id: 1, name: 1, description: 1, author_id: 1, state: 1, created_at: 1,
+                           "number_of_comments": {$size: '$comments'},
+                           "number_of_testers": {$size: '$testers'}}}]).sort({"id": -1}, function(err, milestones){
         if(err){
             res.send(err);
         }
         res.json(milestones);
-    })
+    });
 });
 
 router.get('/:id', function(req, res, next) {

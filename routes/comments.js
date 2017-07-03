@@ -5,9 +5,9 @@ var db = mongojs('mongodb://localhost:27017/fridment-new', ['comments']);
 var datetime = require('node-datetime');
 
 /* GET users listing. */
-router.get('/', function(req, res, next) {
+router.get('/:issue_id', function(req, res, next) {
 
-  db.comments.find(function(err, comments){
+  db.comments.find({issue_id: Number(req.params.issue_id)}, function(err, comments){
         if(err){
             res.send(err);
         }
@@ -15,14 +15,14 @@ router.get('/', function(req, res, next) {
     })
 });
 
-router.get('/:id', function(req, res, next) {
-  db.comments.find({id: Number(req.params.id)}, function(err, comments){
-        if(err){
-            res.send(err);
-        }
-        res.json(comments[0]);
-    });
-});
+// router.get('/:id', function(req, res, next) {
+//   db.comments.find({id: Number(req.params.id)}, function(err, comments){
+//         if(err){
+//             res.send(err);
+//         }
+//         res.json(comments[0]);
+//     });
+// });
 
 router.get('/:id/edit', function(req, res, next) {
   db.comments.find({id: Number(req.params.id)}, function(err, comments){
@@ -33,17 +33,19 @@ router.get('/:id/edit', function(req, res, next) {
     });
 });
 
-router.post('/:issue_id', function(req, res, next) {
+router.post('/:milestone_id/:issue_id', function(req, res, next) {
   db.comments.find().sort({"id": -1}).limit(1).toArray(function(err, comments){
         if(err){
             res.send(err);
         }
         id = comments[0]['id'] + 1;
         db.comments.insert({id: id,
-                            author_id: Number(req.body.author_id),
+                            author_id: 1,
                             issue_id: Number(req.params.issue_id),
-                            state: null,
-                            description: req.body.description, created_at: datetime.create().format('n d Y')});
+                            milestone_id: Number(req.params.milestone_id),
+                            state: (req.body.state == 'true'),
+                            description: req.body.description,
+                            created_at: datetime.create().format('n d Y')});
 
         db.comments.find({id: id}, function(err, comments){
           if(err){
@@ -56,7 +58,7 @@ router.post('/:issue_id', function(req, res, next) {
 
 router.patch('/:id', function(req, res, next) {
   db.comments.update({id: Number(req.params.id)},
-                      { $set: { state: req.body.state,
+                      { $set: { state: (req.body.state == 'true'),
                                 description: req.body.description
                               } }, function(err, comments){
         if(err){
