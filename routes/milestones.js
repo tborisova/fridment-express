@@ -139,7 +139,7 @@ router.post('/generate_issues/:id', function(req, res, next) {
                                 name: body[i]['title'],
                                 description: body[i]['body'],
                                 milestone_id: Number(req.params.id),
-                                assignee_name: body[i]['user']['tborisova'],
+                                assignee_name: body[i]['user']['login'],
                                 issue_url: body[i]['html_url']})
             }
           });
