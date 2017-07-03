@@ -14,4 +14,15 @@ router.get('/', function(req, res, next) {
     });
 });
 
+router.post('/', function(req, res, next) {
+	db.users.find().sort({"id": -1}).limit(1).toArray(function(err, issues){
+        if(err){
+            res.send(err);
+        }
+        id = issues[0]['id'] + 1;
+        db.users.insert({name: req.body.name, email: req.body.email, id: id})
+      	res.send(200)
+    });
+});
+
 module.exports = router;

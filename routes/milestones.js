@@ -1,8 +1,10 @@
 var express = require('express');
 var router = express.Router();
 var mongojs = require('mongojs');
-var db = mongojs('mongodb://localhost:27017/fridment-new', ['milestones']);
+var db = mongojs('mongodb://localhost:27017/fridment-new', ['milestones', 'issues']);
 var datetime = require('node-datetime');
+var github = require('octonode');
+
 // var jwt = require('express-jwt');
 // var jwks = require('jwks-rsa');
 
@@ -119,18 +121,31 @@ router.post('/open/:id', function(req, res, next) {
 });
 
 router.post('/generate_issues/:id', function(req, res, next) {
-  db.milestones.update({id: Number(req.params.id)},
-                      { $set: { state: 'opened' } }, function(err, milestones){
+  db.issues.find().sort({"id": -1}).limit(1).toArray(function(err, issues){
         if(err){
             res.send(err);
         }
+        id = issues[0]['id'] + 1;
         db.milestones.find({id: Number(req.params.id)}, function(err, milestones){
           if(err){
             res.send(err);
           }
-        res.json(milestones[0]);
+          var client = github.client();
+
+          client.get('/repos/tborisova/fridment/issues?labels=enhancement', {}, function (err, status, body, headers) {
+            var len = body.length;
+            for (var i = 0; i < len; i++, id++) {
+              db.issues.insert({id: id,
+                                name: body[i]['title'],
+                                description: body[i]['body'],
+                                milestone_id: Number(req.params.id),
+                                assignee_name: body[i]['user']['tborisova'],
+                                issue_url: body[i]['html_url']})
+            }
+          });
+        });
+      res.send(200)
     });
-  });
 });
 
 module.exports = router;

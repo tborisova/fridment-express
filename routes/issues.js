@@ -28,8 +28,6 @@ router.get('/show/:id', function(req, res, next) {
 });
 
 router.get('/get_state/:id', function(req, res, next) {
-  // \total = db.comments.find({issue_id:  Number(req.params.id)})
-  // res.json(total)
     db.comments.find({issue_id: Number(req.params.id) }).count(function(err, total){
         if(total > 0){
             db.comments.aggregate([{ $match : { state : 1, issue_id: Number(req.params.id) } },
@@ -46,7 +44,28 @@ router.get('/get_state/:id', function(req, res, next) {
     });
 });
 
+router.get('/burn_down_chart/:milestone_id', function(req, res, next) {
+    db.comments.find({milestone_id: Number(req.params.milestone_id) }).count(function(err, total){
+        if(total > 0){
+            db.comments.aggregate([{ $match : {milestone_id: Number(req.params.milestone_id) } },
+                                {"$group":{"_id":{"state":  {
+                                      $cond: { if: { $eq: [ "$state", 1 ] }, then: 'tested', else: 'not tested' }
+                                    }},"count":{"$sum":1}}},
+                                    { "$project": {"percentage": {"$multiply": [ {"$divide":[100,total] },"$count"] } } }]).toArray(function(error, issues){
+                if(error){
+                    res.send(error);
+                }
 
+                hash = [{ name: issues[0]['_id']['state'], percentage: issues[0]['percentage']},
+                        { name: issues[1]['_id']['state'], percentage: issues[1]['percentage']}
+                       ]
+                res.json(hash);
+            });
+        }else{
+            res.json(0)
+        }
+    });
+});
 
 router.get('/get_testers/:id', function(req, res, next) {
   db.issue_testers.find({issue_id: Number(req.params.id) }).toArray(function(err, issue_testers){
