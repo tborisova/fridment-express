@@ -25,10 +25,10 @@ router.get('/', function(req, res, next) {
   db.milestones.aggregate([{$lookup: { from : "issues", localField: 'id', foreignField: 'milestone_id', as: 'issues'}},
                            {$lookup: { from : "comments", localField: 'id', foreignField: 'milestone_id', as: 'comments'}},
                            {$lookup: {from: 'issue_testers', localField: 'id', foreignField: 'milestone_id', as: 'testers'}},
-                           {$project: {"number_of_issues":{$size: '$issues'},
+                           {$project: {"number_of_issues_for_milestone":{$size: '$issues'},
                            id: 1, name: 1, description: 1, author_id: 1, state: 1, created_at: 1,
-                           "number_of_comments": {$size: '$comments'},
-                           "number_of_testers": {$size: '$testers'}}}]).sort({"id": -1}, function(err, milestones){
+                           "number_of_comments_for_milestone": {$size: '$comments'},
+                           "number_of_required_tests_for_milestone": {$size: '$testers'}}}]).sort({"id": -1}, function(err, milestones){
         if(err){
             res.send(err);
         }

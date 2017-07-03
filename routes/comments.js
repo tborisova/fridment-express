@@ -15,14 +15,6 @@ router.get('/:issue_id', function(req, res, next) {
     })
 });
 
-// router.get('/:id', function(req, res, next) {
-//   db.comments.find({id: Number(req.params.id)}, function(err, comments){
-//         if(err){
-//             res.send(err);
-//         }
-//         res.json(comments[0]);
-//     });
-// });
 
 router.get('/:id/edit', function(req, res, next) {
   db.comments.find({id: Number(req.params.id)}, function(err, comments){
