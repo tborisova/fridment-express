@@ -62,7 +62,7 @@ router.post('/', function(req, res, next) {
             res.send(err);
         }
         id = milestones[0]['id'] + 1;
-        db.milestones.insert({id: id, name: req.body.name, description: req.body.description, author_id: Number(req.body.author_id), state: 'opened', created_at: datetime.create().format('n d Y')})
+        db.milestones.insert({id: id, name: req.body.name, description: req.body.description, author_id: Number(req.body.author_id), state: 1, created_at: datetime.create().format('n d Y')})
 
         db.milestones.find({id: id}, function(err, milestones){
           if(err){
@@ -92,7 +92,7 @@ router.patch('/:id', function(req, res, next) {
 
 router.post('/finish/:id', function(req, res, next) {
   db.milestones.update({id: Number(req.params.id)},
-                      { $set: { state: 'finished' } }, function(err, milestones){
+                      { $set: { state: 2 } }, function(err, milestones){
         if(err){
             res.send(err);
         }
@@ -107,7 +107,7 @@ router.post('/finish/:id', function(req, res, next) {
 
 router.post('/open/:id', function(req, res, next) {
   db.milestones.update({id: Number(req.params.id)},
-                      { $set: { state: 'opened' } }, function(err, milestones){
+                      { $set: { state: 1 } }, function(err, milestones){
         if(err){
             res.send(err);
         }

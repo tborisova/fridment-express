@@ -35,7 +35,7 @@ router.post('/:milestone_id/:issue_id', function(req, res, next) {
                             author_id: 1,
                             issue_id: Number(req.params.issue_id),
                             milestone_id: Number(req.params.milestone_id),
-                            state: (req.body.state == 'true'),
+                            state: Number(req.body.state),
                             description: req.body.description,
                             created_at: datetime.create().format('n d Y')});
 
@@ -50,7 +50,7 @@ router.post('/:milestone_id/:issue_id', function(req, res, next) {
 
 router.patch('/:id', function(req, res, next) {
   db.comments.update({id: Number(req.params.id)},
-                      { $set: { state: (req.body.state == 'true'),
+                      { $set: { state: Number(req.body.state),
                                 description: req.body.description
                               } }, function(err, comments){
         if(err){

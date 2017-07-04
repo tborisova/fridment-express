@@ -36,7 +36,11 @@ router.get('/get_state/:id', function(req, res, next) {
                 if(error){
                     res.send(error);
                 }
-                res.json(issues[0]['percentage']);
+                if(issues[0]){
+                    res.json(issues[0]['percentage']);
+                }else{
+                    res.json(0);
+                }
             });
         }else{
             res.json(0)
@@ -56,10 +60,15 @@ router.get('/burn_down_chart/:milestone_id', function(req, res, next) {
                     res.send(error);
                 }
 
-                hash = [{ name: issues[0]['_id']['state'], percentage: issues[0]['percentage']},
-                        { name: issues[1]['_id']['state'], percentage: issues[1]['percentage']}
-                       ]
-                res.json(hash);
+                hash = []
+                if(issues[0]){
+                    hash.push({ name: issues[0]['_id']['state'], percentage: issues[0]['percentage']})
+                }
+
+                if(issues[1]){
+                    hash.push({ name: issues[1]['_id']['state'], percentage: issues[1]['percentage']})
+                }
+                res.json(hash)
             });
         }else{
             res.json(0)
